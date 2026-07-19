@@ -249,6 +249,43 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
 .meas-cell .small-input{width:100%}
 .btn.wide{width:100%;margin-top:12px}
 .chip.meas{background:#e8eef2;color:#3a5566}
+.ex-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.ex-name-wrap{flex:1;min-width:0}
+.timer-btn{flex:none;width:40px;height:40px;border-radius:11px;border:1px solid var(--hair);background:var(--card,#fff);font-size:1.15rem;line-height:1;cursor:pointer}
+.timer-btn.on{background:var(--deep);border-color:var(--deep)}
+.rest-panel{margin:10px 0 4px;padding:12px;border:1px solid var(--hair);border-radius:14px;background:var(--sand,#f4f1ea);text-align:center}
+.rest-panel.rest-done{background:#e9f5ec;border-color:#7bbf8a}
+.rest-time{font-family:'Fraunces',Georgia,serif;font-size:2.4rem;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.rest-ctrls{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.rest-adjust{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.rest-mode{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.chip-btn{background:transparent;border:1px solid var(--hair);border-radius:9px;padding:7px 12px;font-family:Inter;font-size:.82rem;cursor:pointer;color:var(--ink)}
+.seg-mini{background:transparent;border:1px solid var(--hair);border-radius:9px;padding:6px 14px;font-family:Inter;font-size:.8rem;cursor:pointer;color:var(--graphite)}
+.seg-mini.on{background:var(--deep);color:#EAF3F0;border-color:var(--deep);font-weight:600}
+/* case à cocher par série + colonne */
+.log-row{grid-template-columns:30px 1fr 1fr 1fr}
+.log-row:has(.set-chk),.log-row:has(.log-chk-h){grid-template-columns:30px 1fr 1fr 1fr 34px}
+.log-chk-h{font-size:.8rem;color:var(--graphite);text-align:center}
+.set-chk{border:none;background:transparent;font-size:1.3rem;line-height:1;cursor:pointer;color:var(--graphite);padding:0;text-align:center}
+.set-chk.on{color:var(--deep)}
+.log-row.set-done .log-input{opacity:.62}
+.log-row.set-done{background:#f2f7f4;border-radius:8px}
+/* bouton exercice terminé */
+.ex-done-toggle{flex:none;display:flex;align-items:center;gap:5px;border:1px solid var(--hair);background:var(--card,#fff);border-radius:11px;padding:6px 10px;font-family:Inter;font-size:.78rem;color:var(--graphite);cursor:pointer}
+.ex-done-toggle.on{background:#e9f5ec;border-color:#7bbf8a;color:var(--deep)}
+.exd-box{font-size:1rem;line-height:1}
+.ex-card.ex-done{opacity:.72}
+.ex-card.ex-done .ex-name{text-decoration:none}
+.ex-collapsed{font-size:.82rem;color:var(--graphite);padding:6px 2px 2px}
+/* renommer la séance */
+.title-row{display:flex;align-items:center;gap:8px}
+.title-row .display{margin:0}
+.rename-btn{flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--hair);background:var(--card,#fff);font-size:.95rem;line-height:1;cursor:pointer;color:var(--graphite)}
+.rename-row{display:flex;gap:8px;align-items:center;margin:6px 0 4px}
+.rename-row .text-input{flex:1}
+.treadmill-card{border-color:#bcd6cf}
+.treadmill-card .card-eyebrow{margin-top:8px}
+.treadmill-card .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .list-item.picked{border-color:var(--deep);background:#f0f5f3}
 .day-todo{font-size:.6rem;color:var(--deep-2);font-weight:600;margin-top:1px}
 .version-line{text-align:center;font-size:.75rem;color:var(--graphite);margin-top:22px;opacity:.7}
@@ -1528,7 +1565,7 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
   var PROGRAMS_ON = !!(window.CARNET_CONFIG && window.CARNET_CONFIG.showPrograms) && (typeof HexisLibrary !== 'undefined');
   var V16_UX = PROGRESSION_ON || PROGRAMS_ON;   // corrections d'usage v1.6, édition test uniquement
   var IS_BETA = !!(window.CARNET_CONFIG && window.CARNET_CONFIG.beta);   // édition bêta publique (vierge, partageable)
-  var APP_VERSION = IS_BETA ? '1.6.0 bêta' : ((PROGRAMS_ON || PROGRESSION_ON) ? '1.6.0-test' : '1.5.1');
+  var APP_VERSION = IS_BETA ? '1.6.0 bêta' : ((window.CARNET_CONFIG && window.CARNET_CONFIG.versionLabel) || ((PROGRAMS_ON || PROGRESSION_ON) ? '1.6.0-test' : '1.5.1'));
   var USER = 'toi';
   function loadUser() { try { var s = A.getSettings(); if (s && s.userName) USER = s.userName; } catch (e) {} }
 
@@ -1858,8 +1895,8 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
       left.appendChild(el('div', 'li-date', fmtDate(it.date)));
       if (it.kind === 'workout') {
         /*__V16UX_ELSE_START__*/
-        if (V16_UX && it.s.templateName) {
-          left.appendChild(el('div', 'li-sub', it.s.templateName + ' · ' + it.s.entries.length + ' exercice(s)'));
+        if (V16_UX && (it.s.displayName || it.s.templateName)) {
+          left.appendChild(el('div', 'li-sub', (it.s.displayName || it.s.templateName) + ' · ' + it.s.entries.length + ' exercice(s)'));
         } else
         /*__V16UX_ELSE_END__*/
         {
@@ -1898,8 +1935,8 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
     var main = document.getElementById('main'); clear(main);
     var back = el('button', 'back', '‹ Historique'); back.onclick = function () { renderApp('historique'); }; main.appendChild(back);
     /*__V16UX_ELSE_START__*/
-    if (V16_UX && s.templateName) {
-      main.appendChild(el('h1', 'display screen-title', s.templateName));
+    if (V16_UX && (s.displayName || s.templateName)) {
+      main.appendChild(el('h1', 'display screen-title', s.displayName || s.templateName));
       main.appendChild(el('p', 'lede small', fmtDate(s.date)));
     } else
     /*__V16UX_ELSE_END__*/
@@ -1913,12 +1950,26 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
       main.appendChild(w);
     }
     s.entries.forEach(function (en) {
+      if (en.kind === 'treadmill') {
+        var tc = el('section', 'card ex-card treadmill-card');
+        tc.appendChild(el('div', 'ex-name', '🏃 ' + (en.name || 'Tapis')));
+        var r = en.realized || {}; var parts = [];
+        if (r.durationMinutes != null) parts.push(r.durationMinutes + ' min');
+        if (r.distanceKm != null) parts.push(r.distanceKm + ' km');
+        if (r.speedKmh != null) parts.push(r.speedKmh + ' km/h');
+        if (r.inclinePercent != null) parts.push(r.inclinePercent + ' %');
+        if (r.calories != null) parts.push(r.calories + ' kcal');
+        if (r.heartRateAvg != null) parts.push(r.heartRateAvg + ' bpm');
+        tc.appendChild(el('div', 'kpi-sub', parts.join(' · ') || 'Tapis'));
+        main.appendChild(tc);
+        return;
+      }
       var ex = exById[en.exerciseId];
       var card = el('section', 'card ex-card');
       card.appendChild(el('div', 'ex-name', ex ? ex.name : 'Exercice inconnu'));
       var tbl = el('div', 'set-table has-rest');
       var hdr = el('div', 'set-row head'); ['Série', 'Charge', 'Répétitions', 'Récup'].forEach(function (h) { hdr.appendChild(el('div', 'set-cell', h)); }); tbl.appendChild(hdr);
-      en.sets.forEach(function (st, i) {
+      (en.sets || []).forEach(function (st, i) {
         var r = el('div', 'set-row' + (st.unverified ? ' unv' : ''));
         r.appendChild(el('div', 'set-cell idx', String(i + 1)));
         var c = el('div', 'set-cell'); c.appendChild(num(st.charge, 'kg')); r.appendChild(c);
@@ -1957,6 +2008,18 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
     dI.onchange = function () { working.date = dI.value || working.date; };
     drow.appendChild(dI); main.appendChild(drow);
     working.entries.forEach(function (en) {
+      if (en.kind === 'treadmill') {
+        var tc = el('section', 'card ex-card treadmill-card');
+        tc.appendChild(el('div', 'ex-name', '🏃 ' + (en.name || 'Tapis')));
+        var r = en.realized || {}; var pp = [];
+        if (r.durationMinutes != null) pp.push(r.durationMinutes + ' min');
+        if (r.distanceKm != null) pp.push(r.distanceKm + ' km');
+        if (r.speedKmh != null) pp.push(r.speedKmh + ' km/h');
+        if (r.inclinePercent != null) pp.push(r.inclinePercent + ' %');
+        tc.appendChild(el('div', 'kpi-sub', pp.join(' · ') || 'Tapis'));
+        main.appendChild(tc);
+        return;
+      }
       var ex = exById[en.exerciseId];
       var card = el('section', 'card ex-card');
       card.appendChild(el('div', 'ex-name', ex ? ex.name : (en.name || 'Exercice')));
@@ -1990,7 +2053,7 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
     main.appendChild(addWrap);
 
     var save = el('button', 'btn primary', 'Enregistrer les modifications');
-    save.onclick = function () { delete working.__newName; delete working.__newCharge; working.entries = working.entries.filter(function (en) { return en.sets.length; }); Object.assign(orig, working); orig.updatedAt = new Date().toISOString(); A.saveWorkoutSession(orig); toast('Modifications enregistrées'); sessionDetail(id); };
+    save.onclick = function () { delete working.__newName; delete working.__newCharge; working.entries = working.entries.filter(function (en) { return en.kind === 'treadmill' ? (en.realized && en.realized.durationMinutes > 0) : (en.sets && en.sets.length); }); Object.assign(orig, working); orig.updatedAt = new Date().toISOString(); A.saveWorkoutSession(orig); toast('Modifications enregistrées'); sessionDetail(id); };
     main.appendChild(save);
     var cancel = el('button', 'btn ghost', 'Annuler'); cancel.onclick = function () { sessionDetail(id); }; main.appendChild(cancel);
   }
@@ -3088,13 +3151,150 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
   }
 
   // -- Écran de saisie de la séance en cours --------------------------
+  // ═══ Chronomètre de repos par carte d'exercice (édition v1.6) ═══
+  var REST = { openKey: null, key: null, mode: 'down', total: 90, endsAt: null, running: false, remainingAtPause: null, done: false, _tick: null };
+  function restSeed(key, seconds) { REST.key = key; REST.mode = 'down'; REST.total = Math.max(5, seconds || 90); REST.endsAt = null; REST.running = false; REST.remainingAtPause = null; REST.done = false; }
+  function restRemaining() {
+    if (REST.mode === 'up') { if (!REST.running || REST.endsAt == null) return REST.remainingAtPause || 0; return Math.floor((Date.now() - REST.endsAt) / 1000); }
+    if (REST.running && REST.endsAt != null) return Math.max(0, Math.ceil((REST.endsAt - Date.now()) / 1000));
+    if (REST.remainingAtPause != null) return REST.remainingAtPause;
+    return REST.total;
+  }
+  function restFmt(s) { s = Math.max(0, s | 0); var m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; }
+  function restStart() {
+    try { if (typeof Notification !== 'undefined' && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {}
+    if (REST.mode === 'up') { REST.endsAt = Date.now() - (REST.remainingAtPause || 0) * 1000; REST.running = true; REST.done = false; }
+    else { var rem = REST.remainingAtPause != null ? REST.remainingAtPause : REST.total; REST.endsAt = Date.now() + rem * 1000; REST.running = true; REST.done = false; REST.remainingAtPause = null; }
+    restEnsureTick();
+  }
+  function restPause() { REST.remainingAtPause = restRemaining(); REST.running = false; }
+  function restReset() { REST.running = false; REST.remainingAtPause = null; REST.endsAt = null; REST.done = false; }
+  function restAdjust(delta) { var base = REST.running ? restRemaining() : (REST.remainingAtPause != null ? REST.remainingAtPause : REST.total); base = Math.max(5, base + delta); if (REST.mode === 'down') REST.total = base; if (REST.running) REST.endsAt = Date.now() + base * 1000; else REST.remainingAtPause = base; }
+  function restBeep() { try { var Ctx = window.AudioContext || window.webkitAudioContext; if (!Ctx) return; var ac = new Ctx(); var o = ac.createOscillator(), g = ac.createGain(); o.connect(g); g.connect(ac.destination); o.frequency.value = 880; g.gain.value = 0.12; o.start(); setTimeout(function () { o.stop(); ac.close && ac.close(); }, 350); } catch (e) {} }
+  // Demande de permission notification (au démarrage d'un décompte). Best-effort : iOS Safari limite l'API.
+  function restRequestNotify() { try { if (typeof Notification !== 'undefined' && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {} }
+  // Fin de décompte : vibration (Android surtout) + notification système si autorisée + son.
+  function restAlert() {
+    try { if (navigator && typeof navigator.vibrate === 'function') navigator.vibrate([200, 100, 200]); } catch (e) {}
+    try { if (typeof Notification !== 'undefined' && Notification.permission === 'granted') { var n = new Notification('Repos terminé', { body: 'C\'est reparti — série suivante.', tag: 'aklya-rest', silent: false }); setTimeout(function () { try { n.close(); } catch (e) {} }, 8000); } } catch (e) {}
+    restBeep();
+  }
+  function restEnsureTick() {
+    if (REST._tick) return;
+    REST._tick = setInterval(function () {
+      var elv = document.getElementById('rest-timeval'); if (!elv) return;
+      var rem = restRemaining(); elv.textContent = restFmt(rem);
+      if (REST.mode === 'down' && REST.running && rem <= 0) { REST.running = false; REST.done = true; restAlert(); var p = document.getElementById('rest-panel'); if (p) p.classList.add('rest-done'); }
+    }, 250);
+  }
+  function restPanel(key, en) {
+    var wrap = el('div', 'rest-panel' + (REST.done ? ' rest-done' : '')); wrap.id = 'rest-panel';
+    var timeEl = el('div', 'rest-time'); timeEl.id = 'rest-timeval'; timeEl.textContent = restFmt(restRemaining());
+    wrap.appendChild(timeEl);
+    var ctrls = el('div', 'rest-ctrls');
+    var startBtn = el('button', 'btn small', REST.running ? 'Pause' : (REST.done ? 'Relancer' : 'Démarrer'));
+    startBtn.onclick = function () { if (REST.running) restPause(); else { if (REST.done || REST.remainingAtPause === 0) restReset(); restStart(); } renderApp('seance'); };
+    var resetBtn = el('button', 'btn ghost small', 'Reset'); resetBtn.onclick = function () { restReset(); renderApp('seance'); };
+    ctrls.appendChild(startBtn); ctrls.appendChild(resetBtn);
+    wrap.appendChild(ctrls);
+    if (REST.mode === 'down') {
+      var adj = el('div', 'rest-adjust');
+      var m15 = el('button', 'chip-btn', '−15 s'); m15.onclick = function () { restAdjust(-15); renderApp('seance'); };
+      var p15 = el('button', 'chip-btn', '+15 s'); p15.onclick = function () { restAdjust(15); renderApp('seance'); };
+      adj.appendChild(m15); adj.appendChild(p15); wrap.appendChild(adj);
+    }
+    var modeRow = el('div', 'rest-mode');
+    var toDown = el('button', 'seg-mini' + (REST.mode === 'down' ? ' on' : ''), 'Décompte');
+    toDown.onclick = function () { if (REST.mode !== 'down') { REST.mode = 'down'; restReset(); } renderApp('seance'); };
+    var toUp = el('button', 'seg-mini' + (REST.mode === 'up' ? ' on' : ''), 'Libre');
+    toUp.onclick = function () { if (REST.mode !== 'up') { REST.mode = 'up'; restReset(); REST.remainingAtPause = 0; } renderApp('seance'); };
+    modeRow.appendChild(toDown); modeRow.appendChild(toUp); wrap.appendChild(modeRow);
+    return wrap;
+  }
+
+  // Bloc TAPIS dans une séance muscu : vraie activité cardio (jamais charge×séries).
+  // planned = prévu (échauffement/fin de séance) ; realized = réellement réalisé (exécution -> résultat).
+  function treadmillNumField(label, val, onchange) {
+    var wrap = el('div', 'field');
+    wrap.appendChild(el('label', 'field-label', label));
+    var inp = el('input', 'text-input'); inp.type = 'number'; inp.inputMode = 'decimal';
+    if (val != null) inp.value = val;
+    inp.onchange = function () { onchange(inp.value === '' ? null : Number(inp.value)); A.saveDraft(A.getDraft()); };
+    wrap.appendChild(inp); return wrap;
+  }
+  function renderTreadmillCard(main, draft, en, ei) {
+    en.planned = en.planned || {}; en.realized = en.realized || {};
+    var card = el('section', 'card ex-card treadmill-card');
+    var top = el('div', 'ex-top');
+    var nameWrap = el('div', 'ex-name-wrap');
+    nameWrap.appendChild(el('div', 'ex-name', '🏃 ' + (en.name || 'Tapis')));
+    nameWrap.appendChild(el('div', 'ex-presc', 'Cardio · durée / vitesse / pente / distance'));
+    top.appendChild(nameWrap);
+    var rm = el('button', 'ex-done-toggle', '× retirer');
+    rm.onclick = function () { askConfirm('Retirer ce bloc tapis de la séance ?', function () { draft.entries.splice(ei, 1); A.saveDraft(draft); renderApp('seance'); }, { danger: true, yesLabel: 'Retirer' }); };
+    top.appendChild(rm);
+    card.appendChild(top);
+
+    // Prévu (facultatif)
+    card.appendChild(el('div', 'card-eyebrow', 'Prévu (facultatif)'));
+    var gp = el('div', 'field-grid');
+    gp.appendChild(treadmillNumField('Durée (min)', en.planned.durationMinutes, function (v) { en.planned.durationMinutes = v; }));
+    gp.appendChild(treadmillNumField('Vitesse (km/h)', en.planned.speedKmh, function (v) { en.planned.speedKmh = v; }));
+    gp.appendChild(treadmillNumField('Pente (%)', en.planned.inclinePercent, function (v) { en.planned.inclinePercent = v; }));
+    gp.appendChild(treadmillNumField('Distance (km)', en.planned.distanceKm, function (v) { en.planned.distanceKm = v; }));
+    card.appendChild(gp);
+
+    // Réalisé (ce qui sera enregistré)
+    card.appendChild(el('div', 'card-eyebrow', 'Réalisé'));
+    var gr = el('div', 'field-grid');
+    gr.appendChild(treadmillNumField('Durée (min)', en.realized.durationMinutes, function (v) { en.realized.durationMinutes = v; }));
+    gr.appendChild(treadmillNumField('Vitesse (km/h)', en.realized.speedKmh, function (v) { en.realized.speedKmh = v; }));
+    gr.appendChild(treadmillNumField('Pente (%)', en.realized.inclinePercent, function (v) { en.realized.inclinePercent = v; }));
+    gr.appendChild(treadmillNumField('Distance (km)', en.realized.distanceKm, function (v) { en.realized.distanceKm = v; }));
+    gr.appendChild(treadmillNumField('Calories (facultatif)', en.realized.calories, function (v) { en.realized.calories = v; }));
+    gr.appendChild(treadmillNumField('FC moyenne (facultatif)', en.realized.heartRateAvg, function (v) { en.realized.heartRateAvg = v; }));
+    card.appendChild(gr);
+
+    // report "prévu -> réalisé"
+    var copy = el('button', 'link-btn', 'Reprendre les valeurs prévues');
+    copy.onclick = function () { ['durationMinutes', 'speedKmh', 'inclinePercent', 'distanceKm'].forEach(function (k) { if (en.planned[k] != null && en.realized[k] == null) en.realized[k] = en.planned[k]; }); A.saveDraft(draft); renderApp('seance'); };
+    card.appendChild(copy);
+    main.appendChild(card);
+  }
+
   function seanceLog(main, draft) {
     var menuLink = el('button', 'back', '‹ Menu Séance (modèles, bibliothèque)');
     menuLink.onclick = function () { SEANCE_FORCE_MENU = true; renderApp('seance'); };
     main.appendChild(menuLink);
     var head = el('header', 'hd');
     head.appendChild(el('div', 'eyebrow', 'Séance en cours'));
-    head.appendChild(el('h1', 'display hello', draft.type));
+    if (V16_UX) {
+      var titleRow = el('div', 'title-row');
+      var h1 = el('h1', 'display hello', draft.displayName || draft.type);
+      titleRow.appendChild(h1);
+      var renameBtn = el('button', 'rename-btn', '✎');
+      renameBtn.setAttribute('aria-label', 'Renommer la séance');
+      renameBtn.onclick = function () {
+        var editor = el('div', 'rename-row');
+        var inp = el('input', 'text-input'); inp.type = 'text'; inp.value = draft.displayName || draft.type; inp.placeholder = 'Nom de la séance';
+        var ok = el('button', 'btn small', 'OK');
+        ok.onclick = function () {
+          var v = (inp.value || '').trim();
+          draft.displayName = v || null;   // vide -> revient au nom par défaut ; type/templateId inchangés
+          A.saveDraft(draft); renderApp('seance');
+        };
+        editor.appendChild(inp); editor.appendChild(ok);
+        titleRow.parentNode.insertBefore(editor, titleRow.nextSibling);
+        titleRow.remove(); inp.focus();
+      };
+      titleRow.appendChild(renameBtn);
+      head.appendChild(titleRow);
+    } else {
+      head.appendChild(el('h1', 'display hello', draft.type));
+    }
+    //__RENAME_ELSE_START__
+    /* quotidienne : titre simple */
+    //__RENAME_ELSE_END__
     // date modifiable (permet de noter un jour oublié)
     var drow = el('div', 'date-row');
     drow.appendChild(el('span', 'date-label', 'Date :'));
@@ -3105,25 +3305,72 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
     main.appendChild(head);
 
     draft.entries.forEach(function (en, ei) {
-      var card = el('section', 'card ex-card');
+      if (V16_UX && en.kind === 'treadmill') { renderTreadmillCard(main, draft, en, ei); return; }
+      var exDone = !!en.done;
+      var card = el('section', 'card ex-card' + (exDone ? ' ex-done' : ''));
       var top = el('div', 'ex-top');
-      top.appendChild(el('div', 'ex-name', en.name));
-      top.appendChild(el('div', 'ex-presc', prescLine(en.prescriptionSnapshot)));
+      var nameWrap = el('div', 'ex-name-wrap');
+      nameWrap.appendChild(el('div', 'ex-name', en.name));
+      nameWrap.appendChild(el('div', 'ex-presc', prescLine(en.prescriptionSnapshot)));
+      top.appendChild(nameWrap);
+      if (V16_UX) {
+        var doneBtn = el('button', 'ex-done-toggle' + (exDone ? ' on' : ''));
+        doneBtn.appendChild(el('span', 'exd-box', exDone ? '☑' : '☐'));
+        doneBtn.appendChild(el('span', 'exd-lbl', exDone ? 'Terminé' : 'Terminer'));
+        doneBtn.setAttribute('aria-label', 'Marquer l\'exercice comme terminé');
+        doneBtn.onclick = function () { en.done = !en.done; if (!en.done) { /* rouvrir : on ne retouche pas les séries */ } A.saveDraft(draft); renderApp('seance'); };
+        top.appendChild(doneBtn);
+      }
+      if (V16_UX) {
+        var tKey = 't' + ei;
+        var tBtn = el('button', 'timer-btn' + (REST.openKey === tKey ? ' on' : ''), '⏱');
+        tBtn.setAttribute('aria-label', 'Chronomètre de repos');
+        tBtn.onclick = function () {
+          REST.openKey = (REST.openKey === tKey) ? null : tKey;
+          if (REST.openKey === tKey && REST.key !== tKey) {
+            var rs = (en.sets[0] && en.sets[0].restSeconds) || (en.prescriptionSnapshot && en.prescriptionSnapshot.restSeconds) || 90;
+            restSeed(tKey, rs);
+          }
+          renderApp('seance');
+        };
+        top.appendChild(tBtn);
+      }
       card.appendChild(top);
+      if (V16_UX && REST.openKey === ('t' + ei)) card.appendChild(restPanel('t' + ei, en));
       // en-têtes de colonnes
+      var collapsed = false;
+      if (V16_UX && exDone) { collapsed = true; }
+      if (collapsed) {
+        var doneCount = en.sets.filter(function (s) { return s.done; }).length;
+        card.appendChild(el('div', 'ex-collapsed', en.sets.length + ' série(s) · ' + doneCount + ' cochée(s) — appuie sur « Terminé » pour rouvrir'));
+        main.appendChild(card);
+        return;
+      }
       var head = el('div', 'log-row log-head');
       head.appendChild(el('div', 'log-idx', ''));
       head.appendChild(el('div', 'log-h', 'Charge'));
       head.appendChild(el('div', 'log-h', 'Rép.'));
       head.appendChild(el('div', 'log-h', 'Récup'));
+      if (V16_UX) head.appendChild(el('div', 'log-chk-h', '✓'));
       card.appendChild(head);
       // séries
       en.sets.forEach(function (st, si) {
-        var row = el('div', 'log-row');
+        var row = el('div', 'log-row' + (st.done ? ' set-done' : ''));
         row.appendChild(el('div', 'log-idx', 'S' + (si + 1)));
         row.appendChild(logInput(st.charge, 'kg', function (v) { st.charge = v; A.saveDraft(draft); maybeApplyAll(en, si, 'charge', v, 'charge', card, row); }));
         row.appendChild(logInput(st.reps, 'Rép.', function (v) { st.reps = v; A.saveDraft(draft); maybeApplyAll(en, si, 'reps', v, 'répétitions', card, row); }));
         row.appendChild(logInput(st.restSeconds, 's', function (v) { st.restSeconds = v; A.saveDraft(draft); maybeApplyAll(en, si, 'restSeconds', v, 'récup', card, row); }));
+        if (V16_UX) {
+          var chk = el('button', 'set-chk' + (st.done ? ' on' : ''), st.done ? '☑' : '☐');
+          chk.setAttribute('aria-label', 'Valider la série ' + (si + 1));
+          chk.onclick = function () {
+            st.done = !st.done; A.saveDraft(draft);
+            // si toutes les séries sont cochées, proposer de terminer l'exercice
+            if (st.done && en.sets.length && en.sets.every(function (s) { return s.done; }) && !en.done) { en.done = true; }
+            renderApp('seance');
+          };
+          row.appendChild(chk);
+        }
         card.appendChild(row);
       });
       var addSet = el('button', 'link-btn', '+ série');
@@ -3143,14 +3390,42 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
     var nameI = el('input', 'text-input'); nameI.type = 'text'; nameI.placeholder = 'Nom de l\'exercice (ex. Développé couché)';
     var chargeI = el('input', 'text-input small-input'); chargeI.type = 'number'; chargeI.inputMode = 'decimal'; chargeI.placeholder = 'Charge kg (optionnel)';
     var addB = el('button', 'btn small', '+ Ajouter à la séance');
+    var pendingLibId = null;
+    addWrap.appendChild(nameI);
+    // Autocomplétion bibliothèque (édition test/bêta/1.6) directement pendant la séance
+    var sugBox = el('div', 'list sug-inline');
+    if (PROGRAMS_ON) {
+      addWrap.appendChild(sugBox);
+      nameI.oninput = function () {
+        clear(sugBox); pendingLibId = null;
+        var qv = (nameI.value || '').trim(); if (!qv) return;
+        var owned = {}; (draft.entries || []).forEach(function (e) { owned[HexisLibrary.normalize(e.name)] = true; });
+        var sugg = libraryAutocomplete(qv).filter(function (s) { return !owned[HexisLibrary.normalize(s.name)]; }).slice(0, 6);
+        sugg.forEach(function (s) {
+          var b = el('button', 'list-item');
+          var left = el('div', 'li-left'); left.appendChild(el('div', 'li-date', s.name));
+          left.appendChild(el('div', 'li-sub', s.category + (s.equipment && s.equipment.length ? ' · ' + s.equipment.join('/') : '') + (s.matchedAlias ? '  (alias : ' + s.matchedAlias + ')' : '')));
+          b.appendChild(left); b.appendChild(el('span', 'chip', 'choisir'));
+          b.onclick = function () { nameI.value = s.name; pendingLibId = s.id; clear(sugBox); chargeI.focus(); };
+          sugBox.appendChild(b);
+        });
+      };
+    }
     addB.onclick = function () {
       var nm = (nameI.value || '').trim(); if (!nm) { nameI.focus(); return; }
-      var ex = A.createExercise(nm, chargeI.value || null);
-      draft.entries.push({ exerciseId: ex.id, name: nm, prescriptionSnapshot: { setsTarget: 3, repsTarget: null, restSeconds: 90 }, sets: [ { charge: chargeI.value ? Number(chargeI.value) : null, reps: null, restSeconds: null }, { charge: chargeI.value ? Number(chargeI.value) : null, reps: null, restSeconds: null }, { charge: chargeI.value ? Number(chargeI.value) : null, reps: null, restSeconds: null } ] });
+      var ex;
+      if (PROGRAMS_ON && pendingLibId) { ex = ensureLibraryExercise(pendingLibId); if (chargeI.value && ex && ex.startingLoad == null) { ex.startingLoad = { charge: Number(chargeI.value) }; A.saveExercise(ex); } }
+      if (!ex) ex = A.createExercise(nm, chargeI.value || null);
+      draft.entries.push({ exerciseId: ex.id, name: ex.name, prescriptionSnapshot: { setsTarget: 3, repsTarget: null, restSeconds: 90 }, sets: [ { charge: chargeI.value ? Number(chargeI.value) : null, reps: null, restSeconds: null }, { charge: chargeI.value ? Number(chargeI.value) : null, reps: null, restSeconds: null }, { charge: chargeI.value ? Number(chargeI.value) : null, reps: null, restSeconds: null } ] });
       A.saveDraft(draft); renderApp('seance');
     };
-    addWrap.appendChild(nameI); addWrap.appendChild(chargeI); addWrap.appendChild(addB);
+    addWrap.appendChild(chargeI); addWrap.appendChild(addB);
     main.appendChild(addWrap);
+    if (V16_UX) {
+      var addTm = el('button', 'btn ghost', '🏃 Ajouter un bloc Tapis (échauffement / fin de séance)');
+      addTm.onclick = function () { draft.entries.push({ kind: 'treadmill', name: 'Tapis', planned: {}, realized: {}, note: '' }); A.saveDraft(draft); renderApp('seance'); };
+      main.appendChild(addTm);
+    }
 
     // valider / annuler
     var valid = el('button', 'btn primary', 'Valider la séance');
@@ -3182,13 +3457,12 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
     return wrap;
   }
 
-  // proposition "appliquer à toutes les séries" — déclenchée depuis la 1re série
+  // proposition "appliquer à toutes les séries" — depuis N'IMPORTE QUELLE série, si une autre diffère
   function maybeApplyAll(en, si, field, v, label, card, row) {
     if (v == null || v === '') return;
-    if (si !== 0) return;               // on ne propose qu'à partir de la première série
-    if (en.sets.length < 2) return;
-    var others = en.sets.filter(function (s, i) { return i !== si && (s[field] == null || s[field] === ''); });
-    if (!others.length) return;         // rien à remplir
+    if (!en.sets || en.sets.length < 2) return;   // besoin d'au moins 2 séries
+    var others = en.sets.filter(function (s, i) { return i !== si && s[field] !== v; });
+    if (!others.length) return;                   // toutes déjà identiques -> rien à proposer
     var unit = field === 'charge' ? ' kg' : (field === 'restSeconds' ? ' s' : '');
     var msg = 'Appliquer ' + v + unit + ' de ' + label + ' à toutes les séries ?';
     function applyAll() { en.sets.forEach(function (s) { s[field] = v; }); var d = A.getDraft(); A.saveDraft(d); renderApp('seance'); }
@@ -3222,13 +3496,16 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
 
   // -- Valider la séance : crée une vraie workoutSession --------------
   function realSet(s) { return s.reps != null && s.reps > 0; }   // une série n'est "faite" que si des reps sont saisies
+  function isTreadmill(en) { return en && en.kind === 'treadmill'; }
+  function treadmillReal(en) { return isTreadmill(en) && en.realized && en.realized.durationMinutes > 0; }
+  function muscuReal(en) { return !isTreadmill(en) && en.sets && en.sets.some(realSet); }
   function validateSession(draft) {
-    var withReal = draft.entries.filter(function (en) { return en.sets.some(realSet); });
-    if (!withReal.length) { toast('Saisis au moins les répétitions d\'une série avant de valider'); return; }
-    // compte les EXERCICES entièrement sans série réalisée (pas les séries vides une à une)
-    var emptyExercises = draft.entries.filter(function (en) { return !en.sets.some(realSet); }).length;
-    if (emptyExercises === 0) return finalizeSession(draft);  // tout est renseigné -> direct
-    askConfirm(emptyExercises + ' exercice(s) sans répétition seront ignorés. Terminer quand même la séance ?',
+    var withReal = draft.entries.filter(function (en) { return muscuReal(en) || treadmillReal(en); });
+    if (!withReal.length) { toast('Saisis au moins les répétitions d\'une série (ou la durée du tapis) avant de valider'); return; }
+    // éléments sans donnée réelle (exercice sans série faite, ou bloc tapis sans durée)
+    var emptyItems = draft.entries.filter(function (en) { return !muscuReal(en) && !treadmillReal(en); }).length;
+    if (emptyItems === 0) return finalizeSession(draft);  // tout est renseigné -> direct
+    askConfirm(emptyItems + ' élément(s) sans donnée seront ignorés. Terminer quand même la séance ?',
       function () { finalizeSession(draft); },
       { yesLabel: 'Terminer la séance', noLabel: 'Revenir compléter' });
   }
@@ -3241,9 +3518,12 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
       startedAt: draft.startedAt || null, completedAt: now.toISOString(),
       durationSeconds: started ? Math.round((now - started) / 1000) : null,
       entries: draft.entries.map(function (en) {
+        if (en.kind === 'treadmill') {
+          return { kind: 'treadmill', name: en.name || 'Tapis', planned: en.planned || {}, realized: en.realized || {}, note: en.note || null };
+        }
         return { exerciseId: en.exerciseId, prescriptionSnapshot: en.prescriptionSnapshot, prescriptionSnapshotReconstructed: false,
           sets: en.sets.filter(realSet).map(function (s) { return { charge: s.charge, reps: s.reps, restSeconds: s.restSeconds != null ? s.restSeconds : null, unverified: false }; }) };
-      }).filter(function (en) { return en.sets.length; })   // un exercice sans série réellement faite est écarté
+      }).filter(function (en) { return en.kind === 'treadmill' ? (en.realized && en.realized.durationMinutes > 0) : en.sets.length; })   // exercice sans série OU tapis sans durée -> écarté
     };
     // Snapshot du nom du modèle au moment de l'enregistrement (édition test).
     // Figé : renommer le modèle plus tard ne change pas l'historique.
@@ -3252,8 +3532,11 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
       session.templateName = (srcT && srcT.name) || draft.templateName || null;
       session.installedFrom = (srcT && srcT.installedFrom) || draft.installedFrom || null;
     }
+    // Nom personnalisé de CETTE séance (ne modifie ni le modèle ni son templateName figé).
+    if (V16_UX && draft.displayName) session.displayName = draft.displayName;
     // charge de départ mise à jour UNIQUEMENT depuis une série réellement effectuée
     draft.entries.forEach(function (en) {
+      if (en.kind === 'treadmill' || !en.sets) return;   // les blocs tapis n'ont pas de charge
       var lastCharge = null; en.sets.forEach(function (s) { if (realSet(s) && s.charge != null) lastCharge = s.charge; });
       if (lastCharge != null) { var ex = A.getExercises().filter(function (e) { return e.id === en.exerciseId; })[0]; if (ex) { ex.startingLoad = { charge: lastCharge, date: draft.date, source: 'session' }; A.saveExercise(ex); } }
     });

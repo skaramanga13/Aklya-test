@@ -292,6 +292,10 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
 .link-btn.danger{color:#c0392b}
 .rest-auto{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid var(--hair)}
 .rest-auto-lbl{font-size:.82rem;color:var(--graphite);line-height:1.2}
+.seance-model-row{display:flex;align-items:stretch;gap:8px;margin-bottom:8px}
+.seance-model-row .grow{flex:1;margin:0}
+.model-del{flex:none;width:44px;border:1px solid var(--hair);background:var(--card,#fff);border-radius:14px;color:#c0392b;font-size:1.5rem;line-height:1;cursor:pointer}
+.model-del:active{background:#fdecea}
 .list-item.picked{border-color:var(--deep);background:#f0f5f3}
 .day-todo{font-size:.6rem;color:var(--deep-2);font-weight:600;margin-top:1px}
 .version-line{text-align:center;font-size:.75rem;color:var(--graphite);margin-top:22px;opacity:.7}
@@ -1572,7 +1576,7 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
   var PROGRAMS_ON = !!(window.CARNET_CONFIG && window.CARNET_CONFIG.showPrograms) && (typeof HexisLibrary !== 'undefined');
   var V16_UX = PROGRESSION_ON || PROGRAMS_ON;   // corrections d'usage v1.6, édition test uniquement
   var IS_BETA = !!(window.CARNET_CONFIG && window.CARNET_CONFIG.beta);   // édition bêta publique (vierge, partageable)
-  var APP_VERSION = IS_BETA ? '1.6.3 bêta' : ((window.CARNET_CONFIG && window.CARNET_CONFIG.versionLabel) || ((PROGRAMS_ON || PROGRESSION_ON) ? '1.6.0-test' : '1.5.1'));
+  var APP_VERSION = IS_BETA ? '1.6.4 bêta' : ((window.CARNET_CONFIG && window.CARNET_CONFIG.versionLabel) || ((PROGRAMS_ON || PROGRESSION_ON) ? '1.6.0-test' : '1.5.1'));
   var USER = 'toi';
   function loadUser() { try { var s = A.getSettings(); if (s && s.userName) USER = s.userName; } catch (e) {} }
 
@@ -2481,6 +2485,19 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
     if (templates.length) {
       var list = el('div', 'list seance-models');
       templates.forEach(function (t) {
+        if (V16_UX) {
+          var wrap = el('div', 'seance-model-row');
+          var bt = el('button', 'list-item grow');
+          var l2 = el('div', 'li-left'); l2.appendChild(el('div', 'li-date', t.name)); l2.appendChild(el('div', 'li-sub', t.items.length + ' exercice(s)')); bt.appendChild(l2);
+          bt.appendChild(el('span', 'chip', 'démarrer'));
+          bt.onclick = function () { startDraftFromTemplate(t); renderApp('seance'); };
+          wrap.appendChild(bt);
+          var mdel = el('button', 'model-del', '×'); mdel.setAttribute('aria-label', 'Supprimer la séance type ' + t.name);
+          mdel.onclick = function () { askConfirm('Supprimer la séance type « ' + t.name + ' » ?\nTes séances déjà enregistrées dans l\'historique ne sont pas supprimées.', function () { A.deleteTemplate(t.id); toast('Séance type supprimée'); renderApp('seance'); }, { danger: true, yesLabel: 'Supprimer' }); };
+          wrap.appendChild(mdel);
+          list.appendChild(wrap);
+          return;
+        }
         var b = el('button', 'list-item');
         var left = el('div', 'li-left'); left.appendChild(el('div', 'li-date', t.name)); left.appendChild(el('div', 'li-sub', t.items.length + ' exercice(s)')); b.appendChild(left);
         b.appendChild(el('span', 'chip', 'démarrer'));

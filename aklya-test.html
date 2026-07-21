@@ -3510,6 +3510,11 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
     }
     addB.onclick = function () {
       var nm = (nameI.value || '').trim(); if (!nm) { nameI.focus(); return; }
+      // Un nom d'activité cardio (tapis/marche/course/vélo…) saisi à la main -> vrai bloc Tapis, jamais une carte muscu.
+      if (V16_UX && !pendingLibId && !pendingExerciseId && /^(tapis|treadmill|marche|course|running|cardio|velo|rameur|elliptique)$/.test(HexisLibrary.normalize(nm))) {
+        draft.entries.push({ kind: 'treadmill', name: 'Tapis', planned: {}, realized: {}, note: '' });
+        nameI.value = ''; if (typeof chargeI !== 'undefined') chargeI.value = ''; clear(sugBox); A.saveDraft(draft); renderApp('seance'); return;
+      }
       var ex;
       if (PROGRAMS_ON && pendingExerciseId) { ex = A.getExercises().filter(function (e) { return e.id === pendingExerciseId; })[0] || null; }
       if (PROGRAMS_ON && !ex && pendingLibId) { ex = ensureLibraryExercise(pendingLibId); var _c0 = parseNum(chargeI.value, true); if (_c0 != null && ex && ex.startingLoad == null) { ex.startingLoad = { charge: _c0 }; A.saveExercise(ex); } }

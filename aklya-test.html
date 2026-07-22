@@ -3620,7 +3620,15 @@ body{max-width:560px;margin:0 auto;min-height:100dvh}
   }
   function showApplyInline(card, row, msg, onAll) {
     // retirer un éventuel bandeau inline déjà présent dans la carte
-    (card.children || []).slice().forEach(function (c) { if (c.className && (' ' + c.className + ' ').indexOf(' apply-inline ') >= 0) c.remove(); });
+    // NB : dans un vrai navigateur card.children est une HTMLCollection (pas un Array) :
+    // il faut passer par Array.prototype.slice.call, sinon .slice() lève un TypeError sur Safari.
+    var kids = Array.prototype.slice.call(card.children || []);
+    kids.forEach(function (c) {
+      if (c && c.className && (' ' + c.className + ' ').indexOf(' apply-inline ') >= 0) {
+        if (typeof c.remove === 'function') c.remove();
+        else if (c.parentNode) c.parentNode.removeChild(c);
+      }
+    });
     var bar = el('div', 'apply-inline');
     bar.appendChild(el('div', 'ap-msg', msg));
     var btns = el('div', 'ap-btns');
